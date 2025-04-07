@@ -1,20 +1,25 @@
 from htmlnode import LeafNode
 from textnode import TextType, TextNode
+from blocks import BlockType
 import re
 
 
-def markdown_to_blocks(markdown :str) -> list:
-    ilist = markdown.split("\n\n")
-#    ilist = list(map(lambda x: x.strip(), ilist))
-#    itext = "\n".join(ilist).lstrip("\n")+"\n"
-#    mlist = itext.split("\n\n")
-    flist=[]
-    for item in ilist:
-        if item == "":
-            continue
-        item = "\n".join(map(lambda x: x.strip(), item.split("\n"))).strip("\n")
-        flist.append(item)
-    return flist
+def text_to_children(text : str, btype: BlockType) -> list:
+    lista_texto = text.split("\n")
+    match btype:
+        case BlockType.QUOTE:
+            text = " ".join(list(map(lambda x: x.lstrip("> "), lista_texto)))
+        case BlockType.ULIST:
+            text = "<li>" + "<li>".join(list(map(lambda x: x.lstrip("- ")+"</li>", lista_texto)))
+        case BlockType.OLIST:
+            text = "<li>" + "<li>".join(list(map(lambda x: x.lstrip("1234567890. ")+"</li>", lista_texto)))
+
+    text = " ".join(text.split("\n"))
+    nodes = text_to_textnodes(text)
+    fnodes = []
+    for node in nodes:
+        fnodes.append(text_node_to_html_node(node))
+    return fnodes
 
 def text_node_to_html_node(text_node: TextNode) -> LeafNode:
     match(text_node.text_type):

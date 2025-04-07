@@ -5,8 +5,8 @@ class BlockType(Enum):
     HEADING = "heading"
     CODE = "code"
     QUOTE = "quote"
-    UNORDERED_LIST = "unordered list"
-    ORDERED_LIST = "ordered list"
+    ULIST = "unordered list"
+    OLIST = "ordered list"
 
 def block_to_block_type(markdown : str) -> BlockType:
     if len(markdown) == 0:
@@ -29,7 +29,15 @@ def block_to_block_type(markdown : str) -> BlockType:
             if markdown[:3] == "```" and markdown[-3:] == "```":
                 res = BlockType.CODE
         case ">":
-            res = BlockType.QUOTE
+            quotes = markdown.split("\n")
+            test = True
+            for line in quotes:
+                if line[0] == ">":
+                    continue
+                else:
+                    test = False
+            if test == True:
+                res = BlockType.QUOTE
         case "-":
             unorder = markdown.split("\n")
             test = True
@@ -39,7 +47,7 @@ def block_to_block_type(markdown : str) -> BlockType:
                 else:
                     test = False
             if test == True:
-                res = BlockType.UNORDERED_LIST
+                res = BlockType.ULIST
         case "1":
             order = markdown.split("\n")
             count = 1
@@ -52,7 +60,7 @@ def block_to_block_type(markdown : str) -> BlockType:
                     test = False
                     break
             if test == True:
-                res = BlockType.ORDERED_LIST
+                res = BlockType.OLIST
 
         case _:
             res = BlockType.PARAGRAPH
@@ -60,3 +68,19 @@ def block_to_block_type(markdown : str) -> BlockType:
         res = BlockType.PARAGRAPH
 
     return res
+
+def markdown_to_blocks(markdown :str) -> list:
+    ilist = markdown.split("\n\n")
+#    ilist = list(map(lambda x: x.strip(), ilist))
+#    itext = "\n".join(ilist).lstrip("\n")+"\n"
+#    mlist = itext.split("\n\n")
+    flist=[]
+    for item in ilist:
+        if item == "":
+            continue
+        else: 
+            item = "\n".join(map(lambda x: x.strip(), item.split("\n"))).strip("\n")
+            if item == "":
+                continue
+            flist.append(item)
+    return flist

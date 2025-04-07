@@ -30,7 +30,7 @@ class LeafNode(HTMLNode):
             raise ValueError("Leaf Node must have a value")
         if self.tag == None:
             return str(self.value)
-        return f"<{self.tag}{self.props_to_html()}>{self.value}</{self.tag}>"
+        return fr"<{self.tag}{self.props_to_html()}>{self.value}</{self.tag}>"
     
 class ParentNode(HTMLNode):
     def __init__(self, tag, children, props=None):
@@ -45,4 +45,4 @@ class ParentNode(HTMLNode):
         for child in self.children:
             lres.append(child.to_html())
         res = "".join(lres)
-        return f"<{self.tag}{self.props_to_html()}>{res}</{self.tag}>"
+        return fr"<{self.tag}{self.props_to_html()}>{res}</{self.tag}>"
