@@ -1,8 +1,9 @@
 from htmlnode import LeafNode
 from textnode import TextType, TextNode
+import re
 
 
-def text_node_to_html_node(text_node: TextNode):
+def text_node_to_html_node(text_node: TextNode) -> LeafNode:
     match(text_node.text_type):
         case TextType.TEXT:
             return LeafNode(None, text_node.text)
@@ -19,11 +20,12 @@ def text_node_to_html_node(text_node: TextNode):
         case _:
             raise Exception("Text type not compatible")
 
-def split_nodes_delimiter(old_nodes, delimiter, text_type):
+def split_nodes_delimiter(old_nodes: list, delimiter: str, text_type: TextType) -> list:
 
 
     new_nodes=[]
     for node in old_nodes:
+        sub_nodes = []
         if node.text_type != TextType.TEXT:
             new_nodes.append(node)
         else:
@@ -34,8 +36,115 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
                 if new_text[i] == "":
                     continue
                 if i % 2 == 0:
-                    new_nodes.append(TextNode(new_text[i], TextType.TEXT))
+                    sub_nodes.append(TextNode(new_text[i], TextType.TEXT))
                 else:
-                    new_nodes.append(TextNode(new_text[i], text_type))
+                    sub_nodes.append(TextNode(new_text[i], text_type))
+            new_nodes.extend(sub_nodes)
         
     return new_nodes
+
+def extract_markdown_images(text: str) -> list:
+    matches = re.findall(r"!\[([^\[\]]*)\]\(([^\(\)]*)\)", text)
+    res = []
+    for match in matches:
+        match = (match[0].rstrip("]").lstrip("!["), match[1].rstrip(")").lstrip("("))
+        res.append(match)
+    return res
+
+def extract_markdown_links(text: str) -> list:
+    matches = re.findall(r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)", text)
+    res = []
+    for match in matches:
+        match = (match[0].rstrip("]").lstrip("["), match[1].rstrip(")").lstrip("("))
+        res.append(match)
+    return res
+
+def split_nodes_image(old_nodes : list) -> list:
+    res = []
+    for node in old_nodes:
+        if node.text_type != TextType.TEXT:
+            res.append(node)
+        images = extract_markdown_images(node.text)
+        if len(images) == 0:
+            res.append(node)
+            continue
+        new_text = node.text
+        sub_res = []
+        for i in range(len(images)):
+            start, mid = text_special_parser(new_text)("![")("]")
+            _, end = text_special_parser(new_text[mid:])("(")(")")
+            if start == 0:
+                sub_res.append(TextNode(images[i][0], TextType.IMAGE, images[i][1]))
+                if mid + end == len(new_text):
+                    new_text = ""
+                    continue
+                new_text = new_text[mid+end:]
+            else:
+                sub_res.append(TextNode(new_text[:start], TextType.TEXT))
+                sub_res.append(TextNode(images[i][0], TextType.IMAGE, images[i][1]))
+                if mid + end == len(new_text):
+                    new_text = ""
+                    continue
+                new_text = new_text[mid+end:]
+        if len(new_text) > 0:
+            sub_res.append(TextNode(new_text,TextType.TEXT))
+        res.extend(sub_res)
+    return res
+            
+        
+
+def split_nodes_link(old_nodes : list) -> list:
+    res = []
+    for node in old_nodes:
+        if node.text_type != TextType.TEXT:
+            res.append(node)
+            continue
+        links = extract_markdown_links(node.text)
+        if len(links) == 0:
+            res.append(node)
+            continue
+        new_text = node.text
+        sub_res = []
+        for i in range(len(links)):
+            start, mid = text_special_parser(new_text)("[")("]")
+            _, end = text_special_parser(new_text[mid:])("(")(")")
+            if start == 0:
+                sub_res.append(TextNode(links[i][0], TextType.LINK, links[i][1]))
+                if mid + end == len(new_text):
+                    new_text = ""
+                    continue
+                new_text = new_text[mid+end:]
+            else:
+                sub_res.append(TextNode(new_text[:start], TextType.TEXT))
+                sub_res.append(TextNode(links[i][0], TextType.LINK, links[i][1]))
+                if mid + end == len(new_text):
+                    new_text = ""
+                    continue
+                new_text = new_text[mid+end:]
+        if len(new_text) > 0:
+            sub_res.append(TextNode(new_text,TextType.TEXT))
+        res.extend(sub_res)
+    return res
+
+def text_special_parser(text : str) -> list:
+    def inner_parser_start(delimiter_start :str):
+        def inner_parser_end(delimiter_end :str):
+            start = len(text.split(delimiter_start, maxsplit=1)[0])
+            end = len(text) - len(text[start:].split(delimiter_end,maxsplit=1)[1])
+            return [start, end]
+        return inner_parser_end
+    return inner_parser_start
+
+def text_to_textnodes(text: str) -> list:
+    node = TextNode(text, TextType.TEXT)
+    l_nodes = split_nodes_delimiter(
+        split_nodes_delimiter(
+            split_nodes_delimiter(
+                split_nodes_link(
+                    split_nodes_image([node])
+                ), "`", TextType.CODE
+            ), "**", TextType.BOLD
+        ),  "_", TextType.ITALIC
+    )
+
+    return l_nodes

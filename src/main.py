@@ -1,9 +1,9 @@
 from textnode import TextNode, TextType
+from conversors import *
 
 
 def main():
-    test_node = TextNode("primeiro teste", TextType.CODE, "www.testando.com" )
-    print(test_node)
+    print("Main here, still doing nothing")
 
 
 if __name__ == "__main__":
