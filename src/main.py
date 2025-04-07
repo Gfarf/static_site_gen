@@ -1,18 +1,22 @@
-from htmlfromblocks import markdown_to_html_node
+from files import walk_path, clear_dir, copy_files
+import os
 
+
+
+
+ROOT = os.getcwd()
+SOURCE = ROOT + "/static"
+DESTINATION = ROOT + "/public"
 
 def main():
-    print("Main here, still doing nothing")
-    md = """
-        > This is a
-        > blockquote block
+    
+    clear_dir(DESTINATION)
+    os.rmdir(DESTINATION)
+    os.mkdir(DESTINATION)
+    copied_files = copy_files(SOURCE, DESTINATION)
+    print(copied_files)
 
-        this is paragraph text
 
-        """
-    no = markdown_to_html_node(md)
-    html = no.to_html()
-    print(html)
 
 if __name__ == "__main__":
     main()
