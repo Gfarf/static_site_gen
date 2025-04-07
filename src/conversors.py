@@ -3,6 +3,19 @@ from textnode import TextType, TextNode
 import re
 
 
+def markdown_to_blocks(markdown :str) -> list:
+    ilist = markdown.split("\n\n")
+#    ilist = list(map(lambda x: x.strip(), ilist))
+#    itext = "\n".join(ilist).lstrip("\n")+"\n"
+#    mlist = itext.split("\n\n")
+    flist=[]
+    for item in ilist:
+        if item == "":
+            continue
+        item = "\n".join(map(lambda x: x.strip(), item.split("\n"))).strip("\n")
+        flist.append(item)
+    return flist
+
 def text_node_to_html_node(text_node: TextNode) -> LeafNode:
     match(text_node.text_type):
         case TextType.TEXT:
