@@ -138,5 +138,31 @@ class TestMarkdownToHTML(unittest.TestCase):
             html,
             "<div><blockquote>This is a blockquote block</blockquote><p>this is paragraph text</p></div>",
         )
+            
+
+    def test_ext_title1(self):
+        md = """
+> This is a
+> blockquote block
+
+# this is paragraph text
+
+        """
+        title, md_fim = extract_title(md)
+        self.assertEqual(
+                title,
+                "this is paragraph text",
+            )
+        self.assertEqual(
+                md_fim,
+                """
+> This is a
+> blockquote block
+
+
+        """,
+            )
+    
+
 if __name__ == "__main__":
     unittest.main()

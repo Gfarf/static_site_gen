@@ -1,6 +1,7 @@
 from files import walk_path, clear_dir, copy_files
 import os
-
+from pathlib import Path
+from pagemake import generate_page_recursive
 
 
 
@@ -9,12 +10,11 @@ SOURCE = ROOT + "/static"
 DESTINATION = ROOT + "/public"
 
 def main():
-    
-    clear_dir(DESTINATION)
-    os.rmdir(DESTINATION)
-    os.mkdir(DESTINATION)
-    copied_files = copy_files(SOURCE, DESTINATION)
-    print(copied_files)
+
+    if os.path.exists(Path(DESTINATION)):
+        clear_dir(DESTINATION)
+    copy_files(SOURCE, DESTINATION)
+    generate_page_recursive("./content", "./template.html", "./public")
 
 
 

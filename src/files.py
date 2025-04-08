@@ -21,15 +21,21 @@ def del_files(files: list):
         os.remove(file)
 
 def del_folders(inside: list):
+    print(f"deleting - {inside}")
     for dir in inside:
+        print(f"deleting - {dir}")
         os.rmdir(dir)
 
 def clear_dir(dir: str):
-    files, inside = walk_path(dir)
-    del_files(files)
-    del_folders(inside)
+    # files, inside = walk_path(dir)
+    # del_files(files)
+    # del_folders(inside)
+    shutil.rmtree(dir)
 
 def copy_files(f_dir: str, t_dir: str):
+    if not os.path.exists(Path(t_dir)):
+        os.mkdir(t_dir)
+
     directories = os.listdir(f_dir)
     c_files = []
     for dir in directories:

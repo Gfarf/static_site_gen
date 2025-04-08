@@ -3,6 +3,18 @@ from blocks import *
 from textnode import *
 from conversors import *
 
+def extract_title(markdown: str)-> str:
+    lines = markdown.split("\n")
+    for line in lines:
+        line = str(line)
+        line.strip()
+        if len(line) < 2:
+            continue
+        if line[:2] == "# ":
+            lines.remove(line)
+            return (line.lstrip("# ").strip(), "\n".join(lines))
+    raise Exception("No h1 title found")
+
 def markdown_to_html_node(markdown: str) -> HTMLNode:
     blocktype_tag = {
             BlockType.CODE : "code",
