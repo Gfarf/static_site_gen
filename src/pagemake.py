@@ -25,12 +25,10 @@ def generate_page(from_path, template_path, dest_path, basepath):
         file.write(template_origem)
 
 def generate_page_recursive(dir_path_content, template_path, dest_dir_path, basepath):
-    dir_path_content = os.path.join(basepath, dir_path_content)
-    template_path = os.path.join(basepath, template_path)
     files, _ = walk_path(dir_path_content)
     for file in files:
         arq = str(file)
-        dest_path = arq.replace(dir_path_content, dest_dir_path)
+        dest_path = arq.replace(dir_path_content[2:], dest_dir_path[2:])
         dest_path = dest_path.replace("md", "html")
         generate_page(file, template_path, dest_path, basepath)
     
