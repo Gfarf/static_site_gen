@@ -34,7 +34,7 @@ def clear_dir(dir: str):
 
 def copy_files(f_dir: str, t_dir: str):
     if not os.path.exists(Path(t_dir)):
-        os.mkdir(t_dir)
+        os.makedirs(t_dir)
 
     directories = os.listdir(f_dir)
     c_files = []
